@@ -1,0 +1,985 @@
+#ifndef GAME_H
+#define GAME_H
+#include <SFML/Graphics.hpp>
+#include "WEAPONS.H"
+#include "ENEMIES.H"
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <fstream>
+
+class ScoresClass
+{
+    public:
+        int getPosition()
+        {
+            return position;
+        }
+
+        int getScore()
+        {
+            return score;
+        }
+
+        std::string getName()
+        {
+            return name;
+        }
+
+        void setName(std::string inputName)
+        {
+            name = inputName;
+        }
+
+        void setScore(int n)
+        {
+            score = n;
+        }
+
+        void setPosition(int n)
+        {
+            position = n;
+        }
+
+        void incrementPosition()
+        {
+            position++;
+        }
+    private:
+        int position;
+        std::string name;
+        int score;
+
+};
+
+class Game
+  {
+    public:
+        Game()
+            : mWindow(sf::VideoMode(1000, 600), "Game",  sf::Style::Close), Weapon1(), Weapon2(), Weapon3(), mapBackground(), Radius(), Arial()
+
+            {
+                TowerHealthOutline.setSize(sf::Vector2f(200, 20));
+                TowerHealthOutline.setOutlineColor(sf::Color::Black);
+                TowerHealthOutline.setOutlineThickness(1);
+                TowerHealthOutline.setFillColor(sf::Color::Transparent);
+                TowerHealthOutline.setPosition(100, 10);
+                TowerHealthInside.setFillColor(sf::Color::Red);
+                TowerHealthInside.setPosition(100, 10);
+
+                attractionPoints[0][0] = 206; attractionPoints[0][1] = 325;
+                attractionPoints[1][0] = 206; attractionPoints[1][1] = 170;
+                attractionPoints[2][0] = 330; attractionPoints[2][1] = 170;
+                attractionPoints[3][0] = 330; attractionPoints[3][1] = 500;
+                attractionPoints[4][0] = 573; attractionPoints[4][1] = 500;
+                attractionPoints[5][0] = 573; attractionPoints[5][1] = 275;
+                attractionPoints[6][0] = 488; attractionPoints[6][1] = 275;
+                attractionPoints[7][0] = 488; attractionPoints[7][1] = 110;
+                attractionPoints[8][0] = 780; attractionPoints[8][1] = 110;
+
+
+                mWindow.setFramerateLimit(60);
+                //Background
+                if (!bTexture.loadFromFile("Images/Background.jpg"))
+                {
+                    //Handle Loading Error
+                }
+                mBackground.setTexture(bTexture);
+
+                if (!mapBackgroundTexture.loadFromFile("Images/Map.png"))
+                {
+                    //Handle Loading Error
+                }
+                mapBackground.setTexture(mapBackgroundTexture);
+                mapBackground.setPosition(0, 50);
+
+                Radius.setRadius(100);
+                Radius.setFillColor(sf::Color(255,255,255,128));
+
+                //Fonts
+                if(!Arial.loadFromFile("Fonts/arial.ttf"))
+                {
+                    //Handle Loading Error
+                }
+
+                //Texts
+                MoneyText.setFont(Arial);
+                MoneyText.setCharacterSize(20);
+                MoneyText.setColor(sf::Color::Black);
+                MoneyText.setStyle(sf::Text::Bold);
+                MoneyText.setPosition(630, 10);
+
+                ScoreText.setFont(Arial);
+                ScoreText.setCharacterSize(20);
+                ScoreText.setColor(sf::Color::Black);
+                ScoreText.setStyle(sf::Text::Bold);
+                ScoreText.setPosition(450, 10);
+
+                Weapon1Text.setFont(Arial);
+                Weapon1Text.setCharacterSize(15);
+                Weapon1Text.setColor(sf::Color::Black);
+                Weapon1Text.setPosition(Weapon1.getBasePosition().x + 55, Weapon1.getBasePosition().y - 20);
+                Weapon1Text.setString(Weapon1.getInfo());
+
+                Weapon2Text.setFont(Arial);
+                Weapon2Text.setCharacterSize(15);
+                Weapon2Text.setColor(sf::Color::Black);
+                Weapon2Text.setPosition(Weapon2.getBasePosition().x + 55, Weapon2.getBasePosition().y - 20);
+                Weapon2Text.setString(Weapon2.getInfo());
+
+                Weapon3Text.setFont(Arial);
+                Weapon3Text.setCharacterSize(15);
+                Weapon3Text.setColor(sf::Color::Black);
+                Weapon3Text.setPosition(Weapon3.getBasePosition().x + 55, Weapon3.getBasePosition().y - 20);
+                Weapon3Text.setString(Weapon3.getInfo());
+
+                PowerupButtonText.setFont(Arial);
+                PowerupButtonText.setCharacterSize(15);
+                PowerupButtonText.setColor(sf::Color::Blue);
+                PowerupButtonText.setStyle(sf::Text::Bold);
+                PowerupButtonText.setPosition(885, 455);
+                PowerupButtonText.setString("Use\nPowerup\n$15000\nClick Button");
+
+                WeaponsTitleBorder.setSize(sf::Vector2f(180.f, 30.f));
+                WeaponsTitleBorder.setPosition(801.f, 51.f);
+                WeaponsTitleBorder.setOutlineThickness(1);
+                WeaponsTitleBorder.setOutlineColor(sf::Color::Blue);
+                WeaponsTitle.setFont(Arial);
+                WeaponsTitle.setCharacterSize(25);
+                WeaponsTitle.setColor(sf::Color::Blue);
+                WeaponsTitle.setStyle(sf::Text::Bold);
+                WeaponsTitle.setPosition(Weapon1Text.getPosition().x - 40, Weapon1Text.getPosition().y - 51);
+                WeaponsTitle.setString("Weapons");
+
+                PlayButtonBorder.setSize(sf::Vector2f(180.f, 30.f));
+                PlayButtonBorder.setPosition(310, 560);
+                PlayButtonBorder.setFillColor(sf::Color(0,0,0,256));
+                PlayButtonBorder.setOutlineThickness(1);
+                PlayButtonBorder.setOutlineColor(sf::Color::Red);
+                PlayButton.setFont(Arial);
+                PlayButton.setColor(sf::Color::Black);
+                PlayButton.setStyle(sf::Text::Bold);
+                PlayButton.setPosition(PlayButtonBorder.getPosition().x + 60, PlayButtonBorder.getPosition().y - 4.5f);
+                PlayButton.setString("Play");
+
+                inGameHelpButton.setSize(sf::Vector2f(60, 40));
+                inGameHelpButton.setFillColor(sf::Color::Transparent);
+                inGameHelpButton.setOutlineColor(sf::Color::Black);
+                inGameHelpButton.setOutlineThickness(2);
+                inGameHelpButton.setPosition(860, 8);
+                inGameHelpButtonText.setFont(Arial);
+                inGameHelpButtonText.setColor(sf::Color::Black);
+                inGameHelpButtonText.setStyle(sf::Text::Bold);
+                inGameHelpButtonText.setCharacterSize(40);
+                inGameHelpButtonText.setString("?");
+                inGameHelpButtonText.setPosition(880, 3);
+
+                inGamePauseButton.setSize(sf::Vector2f(60, 40));
+                inGamePauseButton.setFillColor(sf::Color::Transparent);
+                inGamePauseButton.setOutlineColor(sf::Color::Black);
+                inGamePauseButton.setOutlineThickness(2);
+                inGamePauseButton.setPosition(920, 8);
+                inGamePauseButtonText.setFont(Arial);
+                inGamePauseButtonText.setColor(sf::Color::Black);
+                inGamePauseButtonText.setStyle(sf::Text::Bold);
+                inGamePauseButtonText.setCharacterSize(40);
+                inGamePauseButtonText.setString("ll");
+                inGamePauseButtonText.setPosition(940, 1);
+
+                selectionBox.setSize(sf::Vector2f(42.5, 42.5));
+                selectionBox.setOutlineColor(sf::Color::Cyan);
+                selectionBox.setOutlineThickness(1);
+                selectionBox.setFillColor(sf::Color::Transparent);
+
+                sellWeaponButton.setSize(sf::Vector2f(180, 40));
+                sellWeaponButton.setFillColor(sf::Color::Black);
+                sellWeaponText.setFont(Arial);
+                sellWeaponText.setStyle(sf::Text::Bold);
+                sellWeaponText.setCharacterSize(15);
+                sellWeaponText.setColor(sf::Color::Yellow);
+                sellWeaponButton.setPosition(801.f, 556.f);
+                sellWeaponText.setPosition(801.f, 556.f);
+
+
+
+                if(!speedSelectionTexture.loadFromFile("Images/SpeedSpriteSheet.png"))
+                {
+                    //Handle Loading Error
+                }
+                speedSelectionButton.setTexture(speedSelectionTexture);
+                speedSelectionButton.setPosition(801, 550);
+
+
+                //////////////////////MAIN MENU/////////////////////
+                mainMenuBackgroundTexture.loadFromFile("Images/MainMenu.jpg");
+                mainMenuBackground.setTexture(mainMenuBackgroundTexture);
+
+                playGameButton.setSize(sf::Vector2f(400, 100));
+                playGameButton.setFillColor(sf::Color::Cyan);
+                playGameButton.setOutlineColor(sf::Color::Black);
+                playGameButton.setOutlineThickness(2);
+                playGameButton.setPosition(300, 100);
+                playGameText.setFont(Arial);
+                playGameText.setCharacterSize(40);
+                playGameText.setColor(sf::Color::Black);
+                playGameText.setStyle(sf::Text::Bold);
+                playGameText.setString("New Game");
+                playGameText.setPosition(400, 120);
+
+                helpButton.setSize(sf::Vector2f(400, 100));
+                helpButton.setFillColor(sf::Color::Cyan);
+                helpButton.setOutlineColor(sf::Color::Black);
+                helpButton.setOutlineThickness(2);
+                helpButton.setPosition(300, 200);
+                helpText.setFont(Arial);
+                helpText.setCharacterSize(40);
+                helpText.setColor(sf::Color::Black);
+                helpText.setStyle(sf::Text::Bold);
+                helpText.setString("Help");
+                helpText.setPosition(460, 220);
+
+                highScoresButton.setSize(sf::Vector2f(400, 100));
+                highScoresButton.setFillColor(sf::Color::Cyan);
+                highScoresButton.setOutlineColor(sf::Color::Black);
+                highScoresButton.setOutlineThickness(2);
+                highScoresButton.setPosition(300, 300);
+                highScoresButtonText.setFont(Arial);
+                highScoresButtonText.setCharacterSize(40);
+                highScoresButtonText.setColor(sf::Color::Black);
+                highScoresButtonText.setStyle(sf::Text::Bold);
+                highScoresButtonText.setString("High Scores");
+                highScoresButtonText.setPosition(400, 320);
+
+
+                /////////////////HELP SCREEN/////////////////////
+                cover.setSize(sf::Vector2f(1000, 600));
+                cover.setFillColor(sf::Color(0, 0, 0, 128));
+
+                helpScreenTexture.loadFromFile("Images/HelpScreenSpriteSheet.png");
+                helpScreen.setTexture(helpScreenTexture);
+                helpScreen.setPosition(sf::Vector2f(100, 50));
+
+
+                /////////////////PAUSE SCREEN////////////////////
+                pauseScreenTexture.loadFromFile("Images/PauseScreen.png");
+                pauseScreen.setTexture(pauseScreenTexture);
+                pauseScreen.setPosition(sf::Vector2f(100, 50));
+
+
+                ///////////////////GAME OVER//////////////////////
+                gameOverScreenTexture.loadFromFile("Images/GameOverScreen.png");
+                gameOverScreen.setTexture(gameOverScreenTexture);
+                gameOverScreen.setPosition(sf::Vector2f(100, 50));
+                gameOverScoreText.setFont(Arial);
+                gameOverScoreText.setCharacterSize(25);
+                gameOverScoreText.setColor(sf::Color::Black);
+                gameOverScoreText.setStyle(sf::Text::Bold);
+                gameOverScoreText.setPosition(450, 180);
+
+
+                //////////////////SAVE SCORE////////////////////
+                saveScreenTexture.loadFromFile("Images/SaveScoreScreen.png");
+                saveScreen.setTexture(saveScreenTexture);
+                saveScreen.setPosition(sf::Vector2f(100,50));
+                userNameText.setFont(Arial);
+                userNameText.setCharacterSize(25);
+                userNameText.setColor(sf::Color::Black);
+                userNameText.setStyle(sf::Text::Bold);
+                userNameText.setPosition(380, 275);
+
+                ///////////////HIGH SCORES///////////////////
+                highScoreScreenTexture.loadFromFile("Images/HighScoreScreen.png");
+                highScoreScreen.setTexture(highScoreScreenTexture);
+                highScoreScreen.setPosition(sf::Vector2f(100, 50));
+                hs_userPos.setFont(Arial); hs_userName.setFont(Arial); hs_userScore.setFont(Arial);
+                hs_userPos.setCharacterSize(20); hs_userName.setCharacterSize(20); hs_userScore.setCharacterSize(20);
+                hs_userPos.setColor(sf::Color::Black); hs_userName.setColor(sf::Color::Black); hs_userScore.setColor(sf::Color::Black);
+                hs_userPos.setStyle(sf::Text::Bold); hs_userName.setStyle(sf::Text::Bold); hs_userScore.setStyle(sf::Text::Bold);
+
+
+            }
+        void run()
+        {
+            sf::Clock clock;
+            while (mWindow.isOpen())
+            {
+                if (showMainMenu)
+                {
+                    if(!loadHelpScreen && !gamePaused && !showHighScores)
+                    {
+                        processMainMenuEvents();
+                    }
+                    mainMenuRender();
+                }
+                else if(!playingGame)
+                {
+                    if(!loadHelpScreen && !gamePaused)
+                    {
+                        processPreGameEvents();
+                    }
+                    clock.restart();
+                    BulletTimer.restart();
+                    preGameRender();
+                }
+                else
+                {
+                    if(!GameOver)
+                    {
+                        if (clock.getElapsedTime().asSeconds() > TimePerFrame && !loadHelpScreen && !gamePaused)
+                        {
+                            processDuringGameEvents(BulletTimer.getElapsedTime());
+                            update(clock.getElapsedTime());
+                            if(usingPowerUp)
+                            {
+                                runPowerupAnimation(clock.getElapsedTime().asSeconds());
+                            }
+                            clock.restart();
+                        }
+                        else if(clock.getElapsedTime().asSeconds() > TimePerFrame)
+                        {
+                            clock.restart();
+                        }
+                        BulletTimer.restart();
+                    duringGameRender();
+                    }
+                    else
+                    {
+
+                        if(!savingScore)
+                        {
+                            processGameOverEvents();
+                            gameOverRender();
+                        }
+                        else
+                        {
+                            processSaveScreenEvents();
+                            saveScreenRender();
+                        }
+                    }
+                }
+
+                if(loadHelpScreen)
+                {
+                    processHelpScreenEvents();
+                    helpScreenRender();
+                }
+
+                if(gamePaused)
+                {
+                    processPauseScreenEvents();
+                    pauseScreenRender();
+                }
+
+                if(showHighScores)
+                {
+                    processHighScoreScreenEvents();
+                    highScoreScreenRender();
+                }
+
+                mWindow.display();
+            }
+        }
+
+    private:
+        void processMainMenuEvents()
+        {
+            sf::Event event;
+            while (mWindow.pollEvent(event))
+            {
+                switch(event.type)
+                {
+                case sf::Event::Closed:
+                    mWindow.close();
+                    break;
+                case sf::Event::MouseButtonPressed:
+                    if (event.mouseButton.button == sf::Mouse::Left)
+                    {
+                        if (event.mouseButton.x > playGameButton.getPosition().x && event.mouseButton.x < playGameButton.getPosition().x + 400
+                            && event.mouseButton.y > playGameButton.getPosition().y && event.mouseButton.y < playGameButton.getPosition().y + 100)
+                        {
+                            startNewGame();
+                        }
+                        else if (event.mouseButton.x > helpButton.getPosition().x && event.mouseButton.x < helpButton.getPosition().x + 400
+                            && event.mouseButton.y > helpButton.getPosition().y && event.mouseButton.y < helpButton.getPosition().y + 100)
+                        {
+                            loadHelpScreen = true;
+                            helpScreenNumber = 0;
+                        }
+                        else if (event.mouseButton.x > highScoresButton.getPosition().x && event.mouseButton.x < highScoresButton.getPosition().x + 400
+                            && event.mouseButton.y > highScoresButton.getPosition().y && event.mouseButton.y < highScoresButton.getPosition().y + 100)
+                        {
+                            loadScores();
+                            showHighScores = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        void startNewGame()
+        {
+            Score = 100;
+            Money = 7500;
+
+            totalWeapons = 0;
+            totalEnemies = 0;
+            Weapons.clear();
+            Enemies.clear();
+            speedMultiplier = 1;
+            tempSpeedMultiplier = 1;
+            towerHealth = 300;
+            isDragging1 = false, isDragging2 = false, isDragging3 = false, toggle = false, enemiesAdded = false, usingPowerUp = false;
+            PowerUp.resetUse();
+            powerupAnimationTimer = 0, enemyAnimationTimer = 0, switchTime = 1;
+            selectedPlacedWeapon = false;
+            placedIncorrectly = false;
+            playingGame = false;
+            showMainMenu = false;
+            savedScore = false;
+        }
+
+        void processGameOverEvents()
+        {
+            sf::Event event;
+            while (mWindow.pollEvent(event))
+            {
+                switch(event.type)
+                {
+                case sf::Event::Closed:
+                    mWindow.close();
+                    break;
+                case sf::Event::MouseButtonPressed:
+                    if (event.mouseButton.button == sf::Mouse::Left)
+                    {
+                        if(event.mouseButton.x > 387 && event.mouseButton.x < 590 && event.mouseButton.y > 317 && event.mouseButton.y < 388)
+                        {
+                            GameOver = false;
+                            showMainMenu = true;
+                        }
+                        else if(event.mouseButton.x > 387 && event.mouseButton.x < 590 && event.mouseButton.y > 233 && event.mouseButton.y < 303 && !savedScore)
+                        {
+                            savingScore = true;
+
+                        }
+
+                    }
+                }
+            }
+        }
+
+        void saveScore(std::string name)
+        {
+            int upperBound = 0, lowerBound = totalScores, middleValue = 0;
+            bool breakNow = false;
+            int position;
+
+            while (!breakNow)
+            {
+                middleValue = (upperBound + lowerBound)/2;
+                int comparison = Scores[middleValue].getScore();
+                if (comparison == Score)
+                {
+                    break;
+                }
+                else if(comparison < Score)
+                {
+                    lowerBound = middleValue;
+                }
+                else
+                {
+                    upperBound = middleValue;
+                }
+
+                if(upperBound == lowerBound || upperBound - 1 == lowerBound || lowerBound - 1 == upperBound)
+                    breakNow = true;
+            }
+
+            if(Scores[middleValue].getScore() == Score)
+            {
+                position = Scores[middleValue].getPosition();
+            }
+            else if (Scores[middleValue].getScore() > Score)
+            {
+                if(Scores[totalScores - 1].getScore() > Score)
+                {
+                    middleValue = totalScores;
+                    position = position = Scores[totalScores - 1].getPosition() + 1;
+                }
+                while (Scores[middleValue].getScore() > Score)
+                {
+                    position = Scores[middleValue].getPosition() + 1;
+                    middleValue = middleValue + 1;
+                }
+                position--;
+            }
+            else if (Scores[middleValue].getScore() < Score)
+            {
+                if(Scores[0].getScore()  < Score || Scores[0].getScore() == Score)
+                {
+                    position = 1;
+                    middleValue = 0;
+                }
+                else
+                {
+                    while (Scores[middleValue].getScore() < Score)
+                    {
+                        position = Scores[middleValue].getPosition() - 1;
+                        middleValue = middleValue - 1;
+                        std::cout << "Second " << Scores[middleValue + 1].getScore() << " is less than " << Score << " " << middleValue << std::endl;
+                    }
+                    //position++;
+                    middleValue++;
+                }
+            }
+
+            ScoresClass newScore;
+            newScore.setPosition(position);
+            newScore.setName(name);
+            newScore.setScore(Score);
+            Scores.push_back(Scores[totalScores - 1]);
+
+            for (int i = totalScores - 1; i > middleValue; i--)
+            {
+                Scores[i] = Scores[i-1];
+            }
+
+            Scores[middleValue] = newScore;
+            totalScores++;
+
+            if (Score != Scores[middleValue + 1].getScore() && Score != Scores[middleValue - 1].getScore())
+            {
+                for(middleValue + 1; middleValue < totalScores + 1; middleValue++)
+                {
+                    Scores[middleValue].incrementPosition();
+                }
+
+                if(position == 1)
+                {
+                    Scores[0].setPosition(1);
+                }
+            }
+            else
+            {
+                if(Score == Scores[position - 1].getScore())
+                {
+                    Scores[position].setPosition(Scores[position - 1].getPosition());
+                }
+                else if(Score == Scores[position + 1].getScore())
+                {
+                    Scores[position].setPosition(Scores[position + 1].getPosition());
+                }
+            }
+
+
+            std::ofstream writer("Save File/HighScores.txt");
+
+            for(int i = 0; i < totalScores; i++)
+            {
+                writer << Scores[i].getPosition();
+                writer << ',';
+                writer << Scores[i].getName();
+                writer << ',';
+                writer << Scores[i].getScore();
+
+                if (i != totalScores - 1)
+                {
+                    writer << '\n';
+                }
+            }
+
+            writer.close();
+            loadScores();
+        }
+
+        void loadScores()
+        {
+            Scores.clear();
+            totalScores = 0;
+            //Clear and reset the vector
+            std::ifstream reader("Save File/HighScores.txt");
+            //Open the file
+            ScoresClass newScore;
+            //Create a new class
+            while (!reader.eof())
+            {
+                ScoresClass newScore;
+                std::string line;
+                int x = 0;
+                getline(reader, line, ',');
+                std::stringstream line1;
+                line1.str(line);
+                line1 >> x;
+                newScore.setPosition(x);
+
+                std::string name;
+                getline(reader, name, ',');
+                newScore.setName(name);
+
+                getline(reader, line, '\n');
+                std::stringstream line2;
+                line2.str(line);
+                line2 >> x;
+                newScore.setScore(x);
+
+                Scores.push_back(newScore);
+                totalScores++;
+                //For every item in the file and while not at the end of the file,
+                //add the item into the vector
+            }
+
+            reader.close(); //Close the file
+        }
+        void processPreGameEvents();
+        void invalidPlace();
+        void addNewWeapon(sf::Vector2f position, sf::Vector2f turret, int WeaponType);
+
+        void processDuringGameEvents(sf::Time BulletTime);
+        void changeEnemySpeed();
+        bool hitTarget(int i, int j);
+        void fireBullet(int weapon);
+        bool isInRange(sf::Vector2f WeaponPosition, sf::Vector2f EnemyPosition, int boundaryRadius);
+        void typeOfEnemyToAdd();
+        void addEnemy(int type);
+        void update(sf::Time deltaTime);
+        void runPowerupAnimation(float time);
+
+        void processHelpScreenEvents()
+        {
+            sf::Event event;
+            while (mWindow.pollEvent(event))
+            {
+                switch(event.type)
+                {
+                    case sf::Event::Closed:
+                        mWindow.close();
+                        break;
+                    case sf::Event::MouseButtonPressed:
+                        if(event.mouseButton.button == sf::Mouse::Left)
+                        {
+                            if(event.mouseButton.x > 828 && event.mouseButton.x < 868 && event.mouseButton.y > 62 && event.mouseButton.y < 98)
+                            {
+                                loadHelpScreen = false;
+                                helpScreenNumber = 0;
+                            }
+                            else if(event.mouseButton.x > 816 && event.mouseButton.x < 837 && event.mouseButton.y > 520 && event.mouseButton.y < 538)
+                            {
+                                if(helpScreenNumber != 3)
+                                    helpScreenNumber++;
+                                else
+                                {
+                                    loadHelpScreen = false;
+                                    helpScreenNumber = 0;
+                                }
+                            }
+                            else if(event.mouseButton.x > 136 && event.mouseButton.x < 159 && event.mouseButton.y > 520 && event.mouseButton.y < 538 && helpScreenNumber != 0)
+                            {
+                                helpScreenNumber--;
+                            }
+                        }
+                }
+            }
+        }
+
+        void processPauseScreenEvents()
+        {
+            sf::Event event;
+            while (mWindow.pollEvent(event))
+            {
+                switch(event.type)
+                {
+                    case sf::Event::Closed:
+                        mWindow.close();
+                        break;
+                    case sf::Event::MouseButtonPressed:
+                        if(event.mouseButton.button == sf::Mouse::Left)
+                        {
+                            if(event.mouseButton.x > 285 && event.mouseButton.x < 601)
+                            {
+                                if(event.mouseButton.y > 191 && event.mouseButton.y < 260)
+                                {
+                                    gamePaused = false;
+                                }
+                                else if(event.mouseButton.y > 278 && event.mouseButton.y < 347)
+                                {
+                                    gamePaused = false;
+                                    startNewGame();
+                                }
+                                else if(event.mouseButton.y > 372 && event.mouseButton.y < 440)
+                                {
+                                    gamePaused = false;
+                                    showMainMenu = true;
+                                }
+
+                            }
+                        }
+                }
+            }
+        }
+
+        void helpScreenRender()
+        {
+            mWindow.draw(cover);
+            helpScreen.setTextureRect(sf::IntRect(helpScreenNumber * 800, 0, 800, 500));
+            mWindow.draw(helpScreen);
+        }
+
+        void pauseScreenRender()
+        {
+            mWindow.draw(cover);
+            mWindow.draw(pauseScreen);
+        }
+
+        void mainMenuRender()
+        {
+            mWindow.clear();
+            mWindow.draw(mainMenuBackground);
+            mWindow.draw(playGameButton);
+            mWindow.draw(playGameText);
+            mWindow.draw(helpButton);
+            mWindow.draw(helpText);
+            mWindow.draw(highScoresButton);
+            mWindow.draw(highScoresButtonText);
+        }
+
+        void gameOverRender()
+        {
+            mWindow.draw(mBackground);
+            mWindow.draw(cover);
+            mWindow.draw(gameOverScreen);
+            std::stringstream newScore;
+            newScore << Score;
+            gameOverScoreText.setString(newScore.str());
+            mWindow.draw(gameOverScoreText);
+        }
+
+        void saveScreenRender()
+        {
+            mWindow.draw(mBackground);
+            mWindow.draw(cover);
+            mWindow.draw(saveScreen);
+            userNameText.setString(userName);
+            mWindow.draw(userNameText);
+        }
+
+        void processSaveScreenEvents()
+        {
+            sf::Event event;
+            while(mWindow.pollEvent(event))
+            {
+                switch (event.type)
+                {
+                    case sf::Event::Closed:
+                        mWindow.close();
+                        break;
+
+                    case sf::Event::MouseButtonPressed:
+                        if(event.mouseButton.button == sf::Mouse::Left)
+                        {
+                            if(event.mouseButton.x > 422 && event.mouseButton.x < 592 && event.mouseButton.y > 374 && event.mouseButton.y < 450)
+                            {
+                                loadScores();
+                                saveScore(userName);
+                                savedScore = true;
+                                savingScore = false;
+                                GameOver = false;
+                                showMainMenu = true;
+                                showHighScores = true;
+                            }
+                        }
+
+                    case sf::Event::TextEntered:
+                        if(event.text.unicode < 128 && event.text.unicode > 31 && event.text.unicode != 44)
+                        {
+                            userName+= (static_cast<char>(event.text.unicode));
+                        }
+                        else if(event.text.unicode == 8 && userName.length() != 0)
+                        {
+                            userName.resize(userName.length() - 1);
+                        }
+                        break;
+
+                    case sf::Event::KeyPressed:
+                        if(event.key.code == sf::Keyboard::Return)
+                        {
+                            loadScores();
+                            saveScore(userName);
+                            savedScore = true;
+                            savingScore = false;
+                            GameOver = false;
+                            showMainMenu = true;
+                            showHighScores = true;
+                        }
+                        break;
+                }
+            }
+        }
+
+        void highScoreScreenRender()
+        {
+            mWindow.draw(cover);
+            mWindow.draw(highScoreScreen);
+            for(int i = scoresNumber; i < scoresNumber + 10; i++)
+            {
+                if (i > (totalScores - 1))
+                {
+                    break;
+                }
+                else
+                {
+                    std::stringstream pos;
+                    pos << Scores[i].getPosition();
+                    hs_userPos.setString(pos.str());
+                    if(i != 0 && Scores[i].getPosition() == Scores[i-1].getPosition())
+                    {
+                        hs_userPos.setString(pos.str() + "=");
+                    }
+                    hs_userPos.setPosition(156, 176 + (i%10 * 30));
+
+                    hs_userName.setString(Scores[i].getName());
+                    hs_userName.setPosition(257, 176 + (i%10 * 30));
+
+                    std::stringstream score;
+                    score << Scores[i].getScore();
+                    hs_userScore.setString(score.str());
+                    hs_userScore.setPosition(592, 176 + (i%10 * 30));
+
+                    mWindow.draw(hs_userPos);
+                    mWindow.draw(hs_userName);
+                    mWindow.draw(hs_userScore);
+                }
+            }
+        }
+
+        void processHighScoreScreenEvents()
+        {
+            sf::Event event;
+
+            while(mWindow.pollEvent(event))
+            {
+                switch (event.type)
+                {
+                    case sf::Event::Closed:
+                        mWindow.close();
+                        break;
+                    case sf::Event::MouseButtonPressed:
+                        if(event.mouseButton.button == sf::Mouse::Left)
+                        {
+                            if(event.mouseButton.x > 828 && event.mouseButton.x < 868 && event.mouseButton.y > 62 && event.mouseButton.y < 98)
+                            {
+                                showHighScores = false;
+                                scoresNumber = 0;
+                            }
+                            else if(event.mouseButton.x > 816 && event.mouseButton.x < 837 && event.mouseButton.y > 520 && event.mouseButton.y < 538)
+                            {
+                                if(scoresNumber + 10  < (totalScores - 1))
+                                    scoresNumber += 10;
+                            }
+                            else if(event.mouseButton.x > 136 && event.mouseButton.x < 159 && event.mouseButton.y > 520 && event.mouseButton.y < 538 && scoresNumber != 0)
+                            {
+                                scoresNumber -= 10;
+                            }
+                        }
+
+                }
+            }
+        }
+
+        void preGameRender();
+        void duringGameRender();
+
+    private:
+        Weapon1Class Weapon1;
+        Weapon2Class Weapon2;
+        Weapon3Class Weapon3;
+        Enemy1Class Enemy1;
+        Enemy2Class Enemy2;
+        Enemy3Class Enemy3;
+        PowerUpClass PowerUp;
+
+        //Window
+        sf::RenderWindow mWindow;
+
+        //Main Menu
+        sf::Texture mainMenuBackgroundTexture;
+        sf::Sprite mainMenuBackground;
+        sf::RectangleShape playGameButton, helpButton, highScoresButton;
+        sf::Text playGameText, helpText, highScoresButtonText;
+
+        //Help Screen
+        sf::Texture helpScreenTexture;
+        sf::Sprite helpScreen;
+        sf::RectangleShape cover;
+        int helpScreenNumber = 0;
+
+        //Pause Screen
+        sf::Texture pauseScreenTexture;
+        sf::Sprite pauseScreen;
+        //Also uses the cover
+
+        //Game Over Screen
+        sf::Texture gameOverScreenTexture;
+        sf::Sprite gameOverScreen;
+        sf::Text gameOverScoreText;
+        //Also uses the cover
+
+        //Save Screen
+        sf::Texture saveScreenTexture;
+        sf::Sprite saveScreen;
+        sf::Text userNameText;
+        std::string userName;
+        std::vector<ScoresClass> Scores;
+
+        //HighScores Screen
+        sf::Texture highScoreScreenTexture;
+        sf::Sprite highScoreScreen;
+        sf::Text hs_userPos, hs_userName, hs_userScore;
+        int scoresNumber = 0;
+
+        //Sprites
+        sf::Sprite mBackground, mapBackground, speedSelectionButton;
+        std::vector<GeneralWeaponClass> Weapons;
+        std::vector<GeneralEnemyClass> Enemies;
+
+        //Textures
+        sf::Texture bTexture, mapBackgroundTexture, speedSelectionTexture;
+
+
+        //Shapes
+        sf::CircleShape Radius;
+        sf::RectangleShape WeaponsTitleBorder, PlayButtonBorder, TowerHealthOutline, TowerHealthInside, inGameHelpButton, inGamePauseButton;
+        sf::RectangleShape selectionBox, sellWeaponButton;
+
+        //Fonts
+        sf::Font Arial;
+
+        //Text
+        sf::Text MoneyText, ScoreText, Weapon1Text, Weapon2Text, Weapon3Text, WeaponsTitle, PlayButton, PowerupButtonText, inGameHelpButtonText, inGamePauseButtonText;
+        sf::Text sellWeaponText;
+
+        //Clock
+        sf::Clock WeaponTimer, BulletTimer;
+
+        int attractionPoints [9][2];
+        //Variables
+        int Money = 7500;
+        int Score = 100;
+        int totalScores = 0;
+        int totalWeapons = 0, totalEnemies = 0;
+        float speedMultiplier = 1;
+        float tempSpeedMultiplier = 1;
+        float EnemySpeed;
+        int towerHealth = 300;
+        float fullHealth = 300;
+        bool isDragging1 = false, isDragging2 = false, isDragging3 = false, toggle = false, enemiesAdded = false, usingPowerUp = false;
+        bool playingGame = false, GameOver = false, showMainMenu = true, loadHelpScreen = false, gamePaused = false, savedScore = false, savingScore = false, showHighScores = false;
+        float powerupAnimationTimer = 0, enemyAnimationTimer = 0, switchTime = 1;
+        bool selectedPlacedWeapon = false, placedIncorrectly = false;
+        int selectedPlacedWeaponNumber;
+        float TimePerFrame = (1.f / 60.f);
+
+        sf::Vector2f preBasePosition, preTurretPosition;
+};
+#endif
