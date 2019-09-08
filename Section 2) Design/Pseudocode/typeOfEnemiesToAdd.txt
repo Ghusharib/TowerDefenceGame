@@ -1,0 +1,34 @@
+//Score would start off at more than 0, Assume initial score is set to 50
+//Enemy 1 has a score of 10, Enemy 2 has a score of 50, Enemy 3 has a score of 100 then:
+
+PROCEDURE typeOfEnemyToAdd (int Score)
+    IF (Score > 500)
+        WHILE(Score!=0) //Once the score equals zero, we cannot put in more enemies using this algorithm
+            int n = rand(1, 3) //The enemy addition needs to be random
+            SWITCH(n):
+                CASE(1):
+                    addEnemy(1)
+                    Score = Score - 10
+                    //If the first kind of enemy needs to be added, then there doesn't need to be a check because this kind of enemy is always available to be added
+                    //In which case the enemy is added, and the value of the score is reduced
+                    break
+                CASE(2):
+                    IF (Score - 50 >= 0)
+                    //If we can add the enemy and not go below zero, then and only then must we add the enemy
+                        addEnemy(2)
+                        Score = Score - 50
+                        break
+                    //In which case the enemy is added, and the value of the score is reduced
+                    END IF
+                CASE(3):
+                    //If we can add the enemy and not go below zero, then and only then must we add the enemy
+                    IF (Score - 100 >= 0)
+                        addEnemy(3)
+                        Score = Score - 100
+                        break
+                    //In which case the enemy is added, and the value of the score is reduced
+                    END IF
+            END SWITCH
+        WEND
+    END IF
+END PROCEDURE

@@ -1,0 +1,17 @@
+PROCEDURE processEvents(int totalWeapons, int totalEnemies)
+    FOR i IN RANGE (0, totalWeapons - 1)
+    //Carry out the following on every displayed weapon
+        IF (weapons[i].weaponReadyToFire) THEN
+            weapons.fire()
+            enemyLockedOn.reduceHealth()
+            //If the weapon is ready to fire, start the firing animation and reduce the health
+            //of the enemy that has been locked onto
+        END IF
+    NEXT i
+
+    FOR i IN RANGE (0, totalEnemies - 1)
+        //Carry out the following on every enemy
+        Enemies[i].move(speed)
+        //Make the enemy animate (and hence move) a certain distance dependent on its speed
+    NEXT i
+END PROCEDURE

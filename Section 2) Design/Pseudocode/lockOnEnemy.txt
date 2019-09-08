@@ -1,0 +1,26 @@
+//Assume Global Vector containing all the enemy objects called Enemies[]
+
+PROCEDURE LockOnEnemy(int totalEnemies, int weaponNumber)
+    FOR i IN RANGE(0, totalEnemies - 1)
+    //For every enemy object that has been placed in the Enemies vector carry out the follwing
+        IF isInRange(Enemy.position(), Weapon.position(), Weapon.radius) THEN
+        //If one of the enemies is within the weapon's radius, then lock on to it
+            RETURN i
+            //This returns the enemy number which has been locked to back to the function call
+        END IF
+    NEXT i
+END PROCEDURE
+
+PROCEDURE isInRange(EnemyPosition, WeaponPosition, Radius)
+	int dx = WeaponPosition.x - EnemyPosition.x
+	int dy = WeaponPosition.y - EnemyPosition.y
+	int squared = (dx^2) + (dy^2)
+	int squareroot = squared^0.5
+	IF (squareroot > Radius) THEN
+		RETURN FALSE
+	ELSE
+		RETURN TRUE
+	END IF
+END PROCEDURE
+
+
